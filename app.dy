@@ -1,0 +1,32 @@
+from flask import Flask,request,render_template
+import json
+import time
+import requests
+
+headers={
+    "Authorization" : "Token r8_JTir1FmmLTehVBkP0Vb73JIph4y3JJr40SrGD",
+    "Content-Type" : "application/json"
+}
+
+app = Flask(__name__)
+
+@app.route("/",methods=["GET","POST"])
+def index():
+    if request.method == "POST":
+        q = request.form.get("q")
+        data = json.dumps(
+            {
+                "version" : "r8_JTir1FmmLTehVBkP0Vb73JIph4y3JJr40SrGD",    
+                "input" : {"prompt":q}
+            }
+        )
+        r = requests.post('https://api.replicate.com/v1/predictions',data=data,headers=headers)
+        time.sleep(10)
+        r = r.json()["urls"]["get"]
+        r = requests.post(r,headers=headers).json()["output"]
+        return(render_template("index.html",r=r[0]))
+    else:
+        return(render_template("index.html",r="Waiting for your entry"))
+
+if __name__ == "__main__":
+    app.run()
